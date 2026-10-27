@@ -1,5 +1,4 @@
 
-
 # Annoy: This should be a paper Title
 
 <p align="center">
@@ -21,6 +20,7 @@
   - [Data Processing](#Data-Processing)
   - [Training](#Training)
 - [Citation](#Citation)
+- [License](#License)
 - [Acknowledgement](#Acknowledgement)
 
 ## Introduction
@@ -45,9 +45,18 @@ Annoy-DataSync is a novel approach that transforms code-based reasoning patterns
 
 Due to our collaborators' compliance requirements, we only release the PythonEdu-Rs subset of the Annoy(++) dataset.
 
+### License
+
+The released Annoy datasets are derived from HuggingFaceTB's `python-edu` subset, which is part of [`HuggingFaceTB/smollm-corpus`](https://huggingface.co/datasets/HuggingFaceTB/smollm-corpus) and is licensed under the [Open Data Commons Attribution License (ODC-By)](https://opendatacommons.org/licenses/by/1.0/). The processed `Annoy-PyEdu-Rs` dataset also contains synthetic reasoning annotations generated with DeepSeek-V2.5; we release our contributions under the same ODC-By license to maintain compatibility with the upstream data.
+
+- `Annoy-PyEdu-Rs-Raw`: ODC-By, inherited from the upstream PythonEdu data.
+- `Annoy-PyEdu-Rs`: ODC-By, with attribution to HuggingFaceTB / SmolLM-Corpus for the underlying PythonEdu source data.
+
+Please note that the upstream PythonEdu data is drawn from source repositories with various licenses; follow those original licenses and attribution requirements where they apply.
 
 
 #### Models
+
 <table>
     <tr>
         <th rowspan="2">Base Model / Training</th>
@@ -82,7 +91,6 @@ Due to our collaborators' compliance requirements, we only release the PythonEdu
         <td style="text-align: center; vertical-align: middle;"><a href="https://huggingface.co/SAD12CSE12DA/dsv2-lite-coder_spec_pp">🤗</a></td>
     </tr>
 </table>
-
 
 ## Get Started
 
@@ -130,7 +138,7 @@ python ./src/batched_api_inference.py \
 You can also use GPT series models to do this transformation step, since recently the DeepSeek API is under heavy pressure. For example, set `--model` as `gpt-4o-mini-2024-07-18​` and change `--key` accordingly.
 You may find some the requests failed, it's OK and we just skip them.
 
-*Note that we only provide the code to inference with OpenAI-style APIs. However, it is also 100\% feasible to deploy other open-source models and inference locally via frameworks like [vllm](https://github.com/vllm-project/vllm) or [sglang](https://github.com/sgl-project/sglang). Please refer to their official websites for more details.
+*Note that we only provide the code to inference with OpenAI-style APIs. However, it is also 100% feasible to deploy other open-source models and inference locally via frameworks like [vllm](https://github.com/vllm-project/vllm) or [sglang](https://github.com/sgl-project/sglang). Please refer to their official websites for more details.
 #### Step 2: Parse & Generate I/O Pairs
 ```
 python ./src/parse_gen_ios.py \
@@ -139,7 +147,7 @@ python ./src/parse_gen_ios.py \
 --python_path "python" \
 --run_path "./temp/temp/temp"
 ```
-The `--python_path` is the python path you will use to run the I/O pair generation code, which can be different from what you use in the main workflow, e.g., installed with some specific packages. The `--run_path` is the path where the I/O pair generation code will be executed, since sometimes it will store some temp files in the file systems, so we explicitly assign a place for it to save them.
+The `--python_path` is the python path you will use to run the I/O pair generation code, which can be different from what you use in the main workflow, e.g. installed with some specific packages. The `--run_path` is the path where the I/O pair generation code will be executed, since sometimes it will store some temp files in the file systems, so we explicitly assign a place for it to save them.
 
 #### Step 3: Build Input-Output Prediction Instances
 We only pick 3 input prediction and 3 output prediction instances for each sample.
@@ -177,12 +185,12 @@ In the bash script we run the verification for several times to try our best avo
 ```
 python ./src/build_spec_rev_msg.py \
 --input_file data/spec_1k_gens_verified.jsonl \
---output_file data/spec_1k_msg_rev.jsonl
+--output_file data/spec_1k_rev_msg.jsonl
 ```
-##### Step 6.2: Re-generate
+##### Step 6.2: Inference
 ```
 python ./src/batched_api_inference.py \
---input data/spec_1k_msg_rev.jsonl \
+--input data/spec_1k_rev_msg.jsonl \
 --output data/spec_1k_gens_rev.jsonl \
 --model deepseek-chat \
 --num_process 10 \
@@ -191,26 +199,22 @@ python ./src/batched_api_inference.py \
 --temperature 0.7 \
 --max_tokens 4096
 ```
-##### Step 6.3: Re-verification
+##### Step 6.3: Revision and Re-verification
 ```
 bash ./scripts/pipeline_check.sh \
-data/rawcode_1k_parsed.jsonl \
 data/spec_1k_gens_rev.jsonl \
 data/spec_1k_gens_rev_verified.jsonl \
 python \
 ./temp/temp/temp
 ```
-##### Step 6.4: Final Data
-```
-python ./src/assemble_spec_demo.py \
---result_file_turn1 data/spec_1k_gens_verified.jsonl \
---result_file_turn2 data/spec_1k_gens_rev_verified.jsonl \
---output_file spec_demo_final.jsonl
-```
+
 By doing so, you can get data `data/spec_demo_final.jsonl` with the same format as in our [huggingface dataset](https://huggingface.co/datasets/SAD12CSE12DA/Annoy-Pyedu-Rs).
 
 ### Training
-You can use any popular training framework to train your model like [llama-factory](https://github.com/hiyouga/LLaMA-Factory). 
+You can use any popular training framework to train your model like [llama-factory](https://github.com/hiyougao/LLaMA-Factory). 
+
+## Citation
+If you find our work useful, please cite our paper.
 
 ## Acknowledgement
 We thank Koala NN, TCLV and OMEN for their valuable feedback and suggestions! 🤗🤗🤗
